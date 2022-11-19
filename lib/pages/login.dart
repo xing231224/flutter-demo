@@ -27,7 +27,8 @@ class Login extends StatelessWidget {
                       spreadRadius: 0 //阴影扩散程度
                       )
                 ],
-                image: DecorationImage(image: (AssetImage("images/2.0x/title_bg/title22.png")), fit: BoxFit.cover),
+                image:
+                    DecorationImage(image: (AssetImage("assets/images/2.0x/title_bg/title22.png")), fit: BoxFit.cover),
               ),
               child: Flex(
                 direction: Axis.horizontal,
@@ -51,7 +52,7 @@ class Login extends StatelessWidget {
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 icon: Image.asset(
-                  "images/2.0x/login/weixin.png",
+                  "assets/images/2.0x/login/weixin.png",
                   fit: BoxFit.cover,
                 ),
                 onPressed: () => {
