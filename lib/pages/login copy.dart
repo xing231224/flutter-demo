@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 
-class Login extends StatelessWidget {
-  const Login({super.key});
+class LoginCopy extends StatelessWidget {
+  const LoginCopy({super.key});
 
   @override
   Widget build(BuildContext context) {

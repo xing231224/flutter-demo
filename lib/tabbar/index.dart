@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_theme.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
 import 'package:flutter_application_1/models/tabIcon_data.dart';
 import 'package:flutter_application_1/tabbar/data_page/index.dart';
 import 'package:flutter_application_1/tabbar/mine_page/index.dart';
@@ -142,7 +142,10 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
             } else {
               return Stack(
                 children: <Widget>[
-                  tabBody,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 38),
+                    child: tabBody,
+                  ),
                   bottomBar(),
                 ],
               );

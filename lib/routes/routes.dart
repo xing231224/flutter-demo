@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart'; // 跳转风格
 import 'package:flutter_application_1/fitness_app/fitness_app_home_screen.dart';
-import 'package:flutter_application_1/pages/login.dart';
+import 'package:flutter_application_1/pages/login_page/login.dart';
 import 'package:flutter_application_1/tabbar/index.dart';
 
 final Map<String, Function> routes = {
   "/": (context) => const TabbarDiy(),
-  "/login": (context) => const Login(),
+  "/login": (context) => const LoginPage(),
   "/test": (context) => FitnessAppHomeScreen(),
 };
 

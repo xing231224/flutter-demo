@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/app_theme.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
 
 class MinePage extends StatefulWidget {
   const MinePage({super.key, this.animationController});
@@ -47,8 +47,6 @@ class _MinePageState extends State<MinePage> with TickerProviderStateMixin {
   }
 
   void addAllListData() {
-    const int count = 9;
-
     listViews.add(Text('测试'));
   }
 
