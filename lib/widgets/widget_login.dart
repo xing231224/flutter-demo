@@ -51,8 +51,9 @@ class LoginClipper extends CustomClipper<Path> {
 
 // 登录按钮
 class LoginBtnIconWidget extends StatelessWidget {
-  const LoginBtnIconWidget({super.key});
+  const LoginBtnIconWidget({super.key, required this.onTap});
 
+  final GestureTapCallback onTap;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -63,6 +64,7 @@ class LoginBtnIconWidget extends StatelessWidget {
           child: Center(
             child: BtnTextWhiteWidget(text: 'Login'),
           ),
+          onTap: onTap,
         ),
         Spacer(),
       ],
@@ -72,14 +74,19 @@ class LoginBtnIconWidget extends StatelessWidget {
 
 // 登入输入框
 class LoginInput extends StatelessWidget {
-  const LoginInput({super.key, this.hintText, this.prefixIcon, this.obscureText = false});
+  const LoginInput(
+      {super.key, this.hintText, this.prefixIcon, this.obscureText = false, this.controller, this.errorText});
   final String? hintText;
   final IconData? prefixIcon;
   final bool obscureText;
+  final TextEditingController? controller;
+  final String? errorText;
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
+          errorText: errorText,
           hintText: hintText,
           border: kInputBorder,
           focusedBorder: kInputBorder,
@@ -111,16 +118,16 @@ class GradientBtnWidget extends StatelessWidget {
   final GestureTapCallback? onTap;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: 48,
-      decoration: BoxDecoration(
-          gradient: kBtnLinearGradient, boxShadow: kBtnShadow, borderRadius: BorderRadius.circular(kBtnRadius)),
-      alignment: Alignment.center,
-      child: GestureDetector(
+    return GestureDetector(
+      child: Container(
+        width: width,
+        height: 48,
+        decoration: BoxDecoration(
+            gradient: kBtnLinearGradient, boxShadow: kBtnShadow, borderRadius: BorderRadius.circular(kBtnRadius)),
+        alignment: Alignment.center,
         child: child,
-        onTap: onTap,
       ),
+      onTap: onTap,
     );
   }
 }

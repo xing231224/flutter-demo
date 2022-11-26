@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_1/common/global.dart';
 import 'package:flutter_application_1/routes/routes.dart';
 
 void main() {
@@ -10,7 +11,7 @@ void main() {
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     // SystemChrome.setEnabledSystemUIOverlays([]); //隐藏状态栏
   }
-  runApp(const MyApp());
+  Global.init().then((e) => {runApp(const MyApp())});
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '自定义底部导航',
+      // title: '自定义底部导航',
       // theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       onGenerateRoute: onGenerateRoute,

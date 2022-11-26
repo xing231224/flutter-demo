@@ -1,8 +1,11 @@
 import 'dart:ui';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/common/service.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/theme/app_theme.dart';
+import 'package:flutter_application_1/utils/c_log_util.dart';
+import 'package:flutter_application_1/utils/local.dart';
 import 'package:flutter_application_1/widgets/widget_login.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 
@@ -62,24 +65,11 @@ class LoginBodyWidget extends StatefulWidget {
 }
 
 class _LoginBodyWidgetState extends State<LoginBodyWidget> {
-  String loginType = 'login';
-  final Map loginMap = {
-    'login': LoginForm(),
-    "register": '',
-  };
-
   @override
   void initState() {
     // TODO: implement initState
 
     super.initState();
-  }
-
-  void changeLoginType(String type) {
-    print('测试-------------$type');
-    setState(() {
-      loginType = type;
-    });
   }
 
   @override
@@ -88,23 +78,25 @@ class _LoginBodyWidgetState extends State<LoginBodyWidget> {
       color: Colors.transparent,
       width: double.maxFinite,
       padding: EdgeInsets.all(32),
-      child: Offstage(
-        offstage: !(loginType == 'login'),
-        child: LoginForm(changeLoginType: changeLoginType),
-      ),
+      child: LoginForm(),
     );
   }
 }
 
 // 登录 表单
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key, this.changeLoginType});
-  final changeLoginType;
+  const LoginForm({super.key});
+
   @override
   State<LoginForm> createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<LoginForm> {
+  var _phone = new TextEditingController();
+  var _password = new TextEditingController();
+
+  String? _errorPhone;
+  String? _errorPass;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -112,21 +104,28 @@ class _LoginFormState extends State<LoginForm> {
       children: [
         SizedBox(height: 40),
         Text(
-          'LOGIN',
+          '登录',
           style: TextStyle(fontSize: 25, fontFamily: AppTheme.fontName, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 20),
         LoginInput(
-          hintText: 'ID / Phone',
+          hintText: 'Phone',
           prefixIcon: Icons.account_circle,
+          controller: _phone,
+          errorText: _errorPhone,
         ),
         SizedBox(height: 20),
         LoginInput(
           hintText: 'PassWord',
-          prefixIcon: Icons.password,
+          prefixIcon: Icons.code,
+          controller: _password,
+          obscureText: true,
+          errorText: _errorPass,
         ),
         SizedBox(height: 20),
-        LoginBtnIconWidget(),
+        // LoginBtnIconWidget(
+        //   onTap: loginBtn,
+        // ),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -153,12 +152,16 @@ class _LoginFormState extends State<LoginForm> {
                 children: [
                   FabBtnLogin(
                     imageUrl: "assets/images/2.0x/fab-login/weixin.png",
-                    onPressed: () => {print(22222)},
+                    onPressed: (() async {
+                      // SPrefsUtil().isLogin.setValue(true);
+                      // SPrefsUtil().authToken.setValue('123123');
+                      print('ok--------${await SPrefsUtil().isLogin.getValue()}');
+                    }),
                   ),
-                  FabBtnLogin(
-                    imageUrl: "assets/images/2.0x/fab-login/sms.png",
-                    onPressed: () => {widget.changeLoginType('ces')},
-                  ),
+                  // FabBtnLogin(
+                  //   imageUrl: "assets/images/2.0x/fab-login/sms.png",
+                  //   onPressed: () => {},
+                  // ),
                 ],
               ),
             ],
@@ -166,5 +169,26 @@ class _LoginFormState extends State<LoginForm> {
         )
       ],
     );
+  }
+
+  void loginBtn() async {
+    setState(() {
+      if (_phone.text == '') {
+        _errorPhone = '手机号不得为空';
+        return;
+      } else {
+        _errorPhone = null;
+      }
+      if (_password.text == '') {
+        _errorPass = '密码不得为空';
+        return;
+      } else {
+        _errorPass = null;
+      }
+    });
+    if (_errorPhone != null || _errorPass != null) return;
+    LOG.d('${_phone.text}===================${_password.text}');
+    Response data = await LoginApi.loginAuth({"username": _phone.text, "password": _password.text});
+    LOG.d('${data}===================data');
   }
 }

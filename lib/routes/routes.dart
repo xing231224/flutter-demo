@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart'; // 跳转风格
+import 'package:flutter_application_1/common/global.dart';
 import 'package:flutter_application_1/fitness_app/fitness_app_home_screen.dart';
 import 'package:flutter_application_1/pages/login_page/login.dart';
 import 'package:flutter_application_1/tabbar/index.dart';
+import 'package:flutter_application_1/utils/c_log_util.dart';
+import 'package:flutter_application_1/utils/local.dart';
 
 final Map<String, Function> routes = {
   "/": (context) => const TabbarDiy(),
@@ -10,14 +13,22 @@ final Map<String, Function> routes = {
 };
 
 var onGenerateRoute = (RouteSettings settings) {
+  LOG.d('路由==========${settings.name}');
+
+  final isLogin = Global.prefs.getBool('isLogin');
+  LOG.d('登录状态==========${isLogin}');
   // 统一处理
   final String? name = settings.name;
   final Function? pageContentBuilder = routes[name];
+
   if (pageContentBuilder != null) {
+    if (isLogin == null || isLogin == false) {
+      final Route route = CupertinoPageRoute(builder: (context) => routes['/login']!(context));
+      return route;
+    }
     if (settings.arguments != null) {
       final Route route =
           CupertinoPageRoute(builder: (context) => pageContentBuilder(context, arguments: settings.arguments));
-
       return route;
     } else {
       final Route route = CupertinoPageRoute(builder: (context) => pageContentBuilder(context));
