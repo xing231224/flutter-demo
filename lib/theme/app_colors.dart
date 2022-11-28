@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/theme/app_theme.dart';
 
 // 背景颜色
@@ -16,13 +17,19 @@ const Color kInputBorderColor = Color(0xFFECECEC);
 // const Color kInputBorderColor = Color(0xFF2633C5);
 
 // 按钮渐变背景色
-const LinearGradient kBtnLinearGradient = LinearGradient(
+LinearGradient kBtnLinearGradient = LinearGradient(
   // colors: [
   //   kBtnColorStart,
   //   kBtnColorEnd,
   // ],
+  // colors: [
+  //   AppTheme.nearlyBlue,
+  //   AppTheme.nearlyDarkBlue,
+  // ],
   colors: [
-    AppTheme.nearlyBlue,
     AppTheme.nearlyDarkBlue,
+    HexColor('#6A88E5'),
   ],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
 );

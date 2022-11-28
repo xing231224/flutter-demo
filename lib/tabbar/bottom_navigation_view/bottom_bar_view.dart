@@ -132,10 +132,14 @@ class _BottomBarViewState extends State<BottomBarView> with TickerProviderStateM
                       // alignment: Alignment.center,s
                       decoration: BoxDecoration(
                         color: AppTheme.nearlyDarkBlue,
-                        gradient: LinearGradient(colors: [
-                          AppTheme.nearlyDarkBlue,
-                          HexColor('#6A88E5'),
-                        ], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                        gradient: LinearGradient(
+                          colors: [
+                            AppTheme.nearlyDarkBlue,
+                            HexColor('#6A88E5'),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         shape: BoxShape.circle,
                         boxShadow: <BoxShadow>[
                           BoxShadow(
