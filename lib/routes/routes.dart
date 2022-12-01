@@ -15,14 +15,13 @@ final Map<String, Function> routes = {
 var onGenerateRoute = (RouteSettings settings) {
   LOG.d('路由==========${settings.name}');
 
-  final isLogin = Global.prefs.getBool('isLogin');
-  LOG.d('登录状态==========${isLogin}');
+  LOG.d('登录状态==========${Global.accessToken}');
   // 统一处理
   final String? name = settings.name;
   final Function? pageContentBuilder = routes[name];
 
   if (pageContentBuilder != null) {
-    if (isLogin == null || isLogin == false) {
+    if (Global.accessToken == null || Global.accessToken!.isEmpty) {
       final Route route = CupertinoPageRoute(builder: (context) => routes['/login']!(context));
       return route;
     }

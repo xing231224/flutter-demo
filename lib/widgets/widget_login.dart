@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/theme/app_size.dart';
 import 'package:flutter_application_1/theme/app_style.dart';
+import 'package:flutter_application_1/utils/c_log_util.dart';
 
 ///登录页面剪裁曲线
 class LoginClipper extends CustomClipper<Path> {
@@ -212,7 +213,12 @@ class AnimationBtn extends StatelessWidget {
 
 // 全屏动画
 class StaggerAnimation extends StatelessWidget {
-  StaggerAnimation({Key? key, required this.buttonController, this.bottom = 0.0})
+  StaggerAnimation(
+      {Key? key,
+      required this.buttonController,
+      required this.pushController,
+      this.isPushName = false,
+      this.bottom = 0.0})
       : buttonSqueezeanimation = new Tween(
           begin: 320.0,
           end: 70.0,
@@ -225,137 +231,107 @@ class StaggerAnimation extends StatelessWidget {
             ),
           ),
         ),
-        // buttomZoomOut = new Tween(begin: 70.0, end: 1000.0).animate(
-        //   new CurvedAnimation(
-        //     parent: buttonController,
-        //     curve: new Interval(0.550, 0.999, curve: Curves.bounceOut),
-        //   ),
-        // ),
-        // containerCircleAnimation = new EdgeInsetsTween(
-        //   begin: EdgeInsets.only(bottom: bottom),
-        //   end: EdgeInsets.only(bottom: 0.0),
-        // ).animate(
-        //   new CurvedAnimation(
-        //     parent: buttonController,
-        //     curve: new Interval(
-        //       0.500,
-        //       0.800,
-        //       curve: Curves.ease,
-        //     ),
-        //   ),
-        // ),
+        buttomZoomOut = new Tween(begin: 70.0, end: 1000.0).animate(
+          new CurvedAnimation(
+            parent: pushController,
+            curve: new Interval(0.550, 0.999, curve: Curves.bounceOut),
+          ),
+        ),
+        containerCircleAnimation = new EdgeInsetsTween(
+          begin: EdgeInsets.only(bottom: bottom),
+          end: EdgeInsets.only(bottom: 0.0),
+        ).animate(
+          new CurvedAnimation(
+            parent: pushController,
+            curve: new Interval(
+              0.500,
+              0.800,
+              curve: Curves.ease,
+            ),
+          ),
+        ),
         super(key: key);
   final double bottom;
   final AnimationController buttonController;
+  final AnimationController pushController;
   final Animation buttonSqueezeanimation;
-  // final Animation<EdgeInsets> containerCircleAnimation;
-  // final Animation buttomZoomOut;
-
-  final bool ces = false;
-
+  final Animation<EdgeInsets> containerCircleAnimation;
+  final Animation buttomZoomOut;
+  final bool isPushName;
   Future<Null> _playAnimation() async {
     try {
       await buttonController.forward();
-      // await buttonController.reverse();
     } on TickerCanceled {}
   }
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
     return new Padding(
-      padding: EdgeInsets.only(bottom: bottom),
+      padding: buttomZoomOut.value == 70 ? EdgeInsets.only(bottom: bottom) : containerCircleAnimation.value,
       child: new InkWell(
         onTap: () {
           _playAnimation();
         },
         child: new Hero(
-            tag: "fade",
-            child: new Container(
-                width: buttonSqueezeanimation.value,
-                height: 60.0,
-                alignment: FractionalOffset.center,
-                decoration: new BoxDecoration(
+          tag: "fade",
+          child: buttomZoomOut.value <= 300
+              ? new Container(
+                  width: buttomZoomOut.value == 70 ? buttonSqueezeanimation.value : buttomZoomOut.value,
+                  height: buttomZoomOut.value == 70 ? 60.0 : buttomZoomOut.value,
+                  alignment: FractionalOffset.center,
+                  decoration: new BoxDecoration(
                     // color: const Color.fromRGBO(247, 64, 106, 1.0),
                     gradient: kBtnLinearGradient,
-                    borderRadius: new BorderRadius.all(const Radius.circular(30.0))),
-                child: buttonSqueezeanimation.value > 75.0
-                    ? new Text(
-                        "登 录",
-                        style: new TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 0.3,
-                        ),
-                      )
-                    : new CircularProgressIndicator(
-                        value: null,
-                        strokeWidth: 1.0,
-                        valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-                      ))),
+                    borderRadius: buttomZoomOut.value < 400
+                        ? new BorderRadius.all(const Radius.circular(30.0))
+                        : new BorderRadius.all(const Radius.circular(0.0)),
+                  ),
+                  child: buttonSqueezeanimation.value > 75.0
+                      ? new Text(
+                          "登 录",
+                          style: new TextStyle(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w300,
+                            letterSpacing: 0.3,
+                          ),
+                        )
+                      : buttomZoomOut.value < 300.0
+                          ? new CircularProgressIndicator(
+                              value: null,
+                              strokeWidth: 1.0,
+                              valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+                            )
+                          : null)
+              : new Container(
+                  width: buttomZoomOut.value,
+                  height: buttomZoomOut.value,
+                  decoration: new BoxDecoration(
+                    shape: buttomZoomOut.value < 500 ? BoxShape.circle : BoxShape.rectangle,
+                    // color: const Color.fromRGBO(247, 64, 106, 1.0),
+                    gradient: kBtnLinearGradient,
+                  ),
+                ),
+        ),
       ),
     );
-
-    // return new Padding(
-    //   padding: buttomZoomOut.value == 70 ? EdgeInsets.only(bottom: bottom) : containerCircleAnimation.value,
-    //   child: new InkWell(
-    //     onTap: () {
-    //       _playAnimation();
-    //     },
-    //     child: new Hero(
-    //       tag: "fade",
-    //       child: buttomZoomOut.value <= 300
-    //           ? new Container(
-    //               width: buttomZoomOut.value == 70 ? buttonSqueezeanimation.value : buttomZoomOut.value,
-    //               height: buttomZoomOut.value == 70 ? 60.0 : buttomZoomOut.value,
-    //               alignment: FractionalOffset.center,
-    //               decoration: new BoxDecoration(
-    //                 // color: const Color.fromRGBO(247, 64, 106, 1.0),
-    //                 gradient: kBtnLinearGradient,
-    //                 borderRadius: buttomZoomOut.value < 400
-    //                     ? new BorderRadius.all(const Radius.circular(30.0))
-    //                     : new BorderRadius.all(const Radius.circular(0.0)),
-    //               ),
-    //               child: buttonSqueezeanimation.value > 75.0
-    //                   ? new Text(
-    //                       "登 录",
-    //                       style: new TextStyle(
-    //                         color: Colors.white,
-    //                         fontSize: 20.0,
-    //                         fontWeight: FontWeight.w300,
-    //                         letterSpacing: 0.3,
-    //                       ),
-    //                     )
-    //                   : buttomZoomOut.value < 300.0
-    //                       ? new CircularProgressIndicator(
-    //                           value: null,
-    //                           strokeWidth: 1.0,
-    //                           valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-    //                         )
-    //                       : null)
-    //           : new Container(
-    //               width: buttomZoomOut.value,
-    //               height: buttomZoomOut.value,
-    //               decoration: new BoxDecoration(
-    //                 shape: buttomZoomOut.value < 500 ? BoxShape.circle : BoxShape.rectangle,
-    //                 // color: const Color.fromRGBO(247, 64, 106, 1.0),
-    //                 gradient: kBtnLinearGradient,
-    //               ),
-    //             ),
-    //     ),
-    //   ),
-    // );
   }
 
   @override
   Widget build(BuildContext context) {
     buttonController.addListener(() {
-      if (buttonController.isCompleted) {
-        // Navigator.pushNamed(context, "/");
+      // 循环播放
+      if (buttonSqueezeanimation.isCompleted) {
+        buttonController.forward();
+      }
+    });
+    pushController.addListener(() {
+      if (pushController.isCompleted) {
+        Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
     });
     return new AnimatedBuilder(
       builder: _buildAnimation,
-      animation: buttonController,
+      animation: !isPushName ? buttonController : pushController,
     );
   }
 }
@@ -364,10 +340,14 @@ class InputFieldArea extends StatelessWidget {
   final String? hint;
   final bool obscure;
   final IconData? icon;
-  InputFieldArea({this.hint, this.obscure = false, this.icon});
+  final String? Function(String?)? validator;
+  final GlobalKey<FormFieldState>? formFieldKey;
+  final TextEditingController? controller;
+  InputFieldArea({this.hint, this.obscure = false, this.icon, this.validator, this.controller, this.formFieldKey});
   @override
   Widget build(BuildContext context) {
     return (new Container(
+      padding: EdgeInsets.only(bottom: 5.0),
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
@@ -377,7 +357,10 @@ class InputFieldArea extends StatelessWidget {
         ),
       ),
       child: new TextFormField(
+        controller: controller,
+        key: formFieldKey,
         obscureText: obscure,
+        validator: validator,
         style: const TextStyle(
             // color: Colors.white,
             ),
@@ -392,7 +375,7 @@ class InputFieldArea extends StatelessWidget {
             // color: Colors.white,
             fontSize: 15.0,
           ),
-          contentPadding: const EdgeInsets.only(top: 20.0, right: 20.0, bottom: 20.0, left: 5.0),
+          contentPadding: const EdgeInsets.only(top: 0.0, right: 5.0, bottom: 0.0, left: 5.0),
         ),
       ),
     ));
@@ -400,8 +383,11 @@ class InputFieldArea extends StatelessWidget {
 }
 
 class FormContainer extends StatelessWidget {
-  const FormContainer({super.key, required this.authCodeTap});
+  const FormContainer({super.key, required this.authCodeTap, this.formKey, this.formPhoneKey, this.fieldProp});
   final Future<bool> Function() authCodeTap;
+  final GlobalKey<FormState>? formKey;
+  final GlobalKey<FormFieldState>? formPhoneKey;
+  final Map<String, TextEditingController>? fieldProp;
   @override
   Widget build(BuildContext context) {
     return (new Container(
@@ -411,13 +397,23 @@ class FormContainer extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           new Form(
+            key: formKey,
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 new InputFieldArea(
+                  controller: fieldProp?['phone'],
+                  formFieldKey: formPhoneKey,
                   hint: "请输入手机号",
                   obscure: false,
                   icon: Icons.phone_android_outlined,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return '手机号不得为空';
+                    //手机正则验证
+                    String regexPhoneNumber =
+                        "^((13[0-9])|(15[^4])|(166)|(17[0-8])|(18[0-9])|(19[8-9])|(147,145))\\d{8}\$";
+                    return !RegExp(regexPhoneNumber).hasMatch(value) ? '请输入正确的手机号' : null;
+                  },
                 ),
                 SizedBox(height: 20),
                 new Row(
@@ -426,8 +422,12 @@ class FormContainer extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: InputFieldArea(
+                        controller: fieldProp?['code'],
                         hint: "验证码",
                         icon: Icons.lock_outline,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return '验证码不得为空';
+                        },
                       ),
                     ),
                     Expanded(
@@ -507,10 +507,10 @@ class OtherLogin extends StatelessWidget {
                 imageUrl: "assets/images/2.0x/fab-login/weixin.png",
                 onPressed: (() async {}),
               ),
-              FabBtnLogin(
-                imageUrl: "assets/images/2.0x/fab-login/sms.png",
-                onPressed: () => {},
-              ),
+              // FabBtnLogin(
+              //   imageUrl: "assets/images/2.0x/fab-login/sms.png",
+              //   onPressed: () => {},
+              // ),
             ],
           ),
         ],

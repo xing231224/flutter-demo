@@ -15,7 +15,8 @@ const Color kBtnShadowColor = Color(0x33D83131);
 // 输入框边框颜色
 const Color kInputBorderColor = Color(0xFFECECEC);
 // const Color kInputBorderColor = Color(0xFF2633C5);
-
+const Color kPrimaryColor = Color(0XFF6A62B7);
+const Color kBackgroundColor = Color(0XFFE5E5E5);
 // 按钮渐变背景色
 LinearGradient kBtnLinearGradient = LinearGradient(
   // colors: [

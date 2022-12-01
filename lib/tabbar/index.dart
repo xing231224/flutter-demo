@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/theme/app_colors.dart';
 import 'package:flutter_application_1/theme/app_theme.dart';
 import 'package:flutter_application_1/models/tabIcon_data.dart';
 import 'package:flutter_application_1/tabbar/data_page/index.dart';
@@ -7,6 +8,9 @@ import 'package:flutter_application_1/tabbar/square_page/index.dart';
 import 'package:flutter_application_1/tabbar/task_page/index.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
 import 'bottom_navigation_view/bottom_bar_view.dart';
+import 'components/cancel_button.dart';
+import 'widgets/add_task.dart';
+import 'dart:ui';
 
 class TabbarDiy extends StatefulWidget {
   const TabbarDiy({super.key});
@@ -16,14 +20,16 @@ class TabbarDiy extends StatefulWidget {
 
 class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
   AnimationController? animationController;
+  AnimationController? animationBtnController;
+  Duration animationDuration = Duration(milliseconds: 270);
 
   List<TabIconData> tabIconsList = TabIconData.tabIconsList;
 
   Widget tabBody = Container(
     color: AppTheme.background,
   );
-  // int _currentIndex = 0;
-  // final List<Widget> _pages = [TaskPage(), DataPage(), SquarePage(), MinePag()];
+  bool isHidden = true;
+  late Animation<double> containerSize;
   @override
   void initState() {
     super.initState();
@@ -34,7 +40,8 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
     });
     tabIconsList[0].isSelected = true;
 
-    animationController = AnimationController(duration: const Duration(milliseconds: 600), vsync: this);
+    animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    animationBtnController = AnimationController(vsync: this, duration: animationDuration);
     tabBody = TaskPage(animationController: animationController);
     super.initState();
   }
@@ -88,48 +95,17 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
   @override
   void dispose() {
     animationController?.dispose();
+    animationBtnController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   body: _pages[_currentIndex],
-    //   bottomNavigationBar: BottomNavigationBar(
-    //     selectedItemColor: Colors.black,
-    //     unselectedItemColor: Colors.grey,
-    //     currentIndex: _currentIndex,
-    //     selectedFontSize: 12,
-    //     onTap: (value) => setState(
-    //       () => _currentIndex = value,
-    //     ),
-    //     type: BottomNavigationBarType.fixed, // 当tabbar大于等于4个的时候 需要配置
-    //     items: [
-    //       BottomNavigationBarItem(
-    //           icon: Image.asset('assets/images/2.0x/tabbar/home_tn.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           activeIcon:
-    //               Image.asset('assets/images/2.0x/tabbar/home_tncur.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           label: '任务'),
-    //       BottomNavigationBarItem(
-    //           icon: Image.asset('assets/images/2.0x/tabbar/case_tn.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           activeIcon:
-    //               Image.asset('assets/images/2.0x/tabbar/case_tncur.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           label: '数据'),
-    //       BottomNavigationBarItem(
-    //           icon:
-    //               Image.asset('assets/images/2.0x/tabbar/information_tn.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           activeIcon: Image.asset('assets/images/2.0x/tabbar/information_tncur.png',
-    //               width: 30, height: 30, fit: BoxFit.cover),
-    //           label: '广场'),
-    //       BottomNavigationBarItem(
-    //           icon: Image.asset('assets/images/2.0x/tabbar/my_tn.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           activeIcon:
-    //               Image.asset('assets/images/2.0x/tabbar/my_tncur.png', width: 30, height: 30, fit: BoxFit.cover),
-    //           label: '我的'),
-    //     ],
-    //   ),
-    // );
-
+    Size size = MediaQuery.of(context).size;
+    // double defaultSize = size.height - (size.height * 0.2);
+    double defaultSize = size.height - (size.height * 0.1);
+    containerSize = Tween<double>(begin: size.height * 0.1, end: defaultSize)
+        .animate(CurvedAnimation(parent: animationBtnController!, curve: Curves.linear));
     return Container(
       color: AppTheme.background,
       child: Scaffold(
@@ -147,6 +123,33 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
                     child: tabBody,
                   ),
                   bottomBar(),
+                  CancelButton(
+                    isHidden: isHidden,
+                    animationDuration: animationDuration,
+                    size: size,
+                    animationController: animationBtnController,
+                    tapEvent: isHidden
+                        ? null
+                        : () {
+                            // returning null to disable the button
+                            animationBtnController!.reverse();
+                            setState(() {
+                              isHidden = !isHidden;
+                            });
+                          },
+                  ),
+                  AnimatedBuilder(
+                    animation: animationBtnController!,
+                    builder: (context, child) {
+                      if (!isHidden) {
+                        return buildRegisterContainer();
+                      }
+                      // Returning empty container to hide the widget
+                      return Container();
+                    },
+                  ),
+                  AddTaskWidget(
+                      isHidden: isHidden, animationDuration: animationDuration, size: size, defaultSize: defaultSize)
                 ],
               );
             }
@@ -170,9 +173,7 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
         BottomBarView(
           isLabel: true,
           tabIconsList: tabIconsList,
-          addClick: () {
-            print(232333333);
-          },
+          addClick: handleAddTask,
           changeIndex: (int index) {
             animationController?.reverse().then<dynamic>((data) {
               if (!mounted) {
@@ -201,5 +202,46 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
         ),
       ],
     );
+  }
+
+  Widget buildRegisterContainer() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: double.infinity,
+        height: containerSize.value,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(80),
+            topRight: Radius.circular(80),
+          ),
+          // boxShadow: [
+          //   BoxShadow(
+          //       color: Colors.black12,
+          //       offset: Offset(0.0, 1.0), //阴影xy轴偏移量
+          //       blurRadius: 1.0, //阴影模糊程度
+          //       spreadRadius: 1.0 //阴影扩散程度
+          //       )
+          // ],
+          color: Colors.white30,
+        ),
+        clipBehavior: Clip.hardEdge,
+        alignment: Alignment.center,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+          child: Opacity(
+            opacity: 0.1,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 创建任务
+  handleAddTask() {
+    setState(() {
+      isHidden = false;
+    });
+    animationBtnController!.forward();
   }
 }

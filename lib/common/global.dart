@@ -1,22 +1,23 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/utils/c_log_util.dart';
 import 'package:flutter_application_1/utils/local.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Global {
   static late SharedPreferences prefs;
   // 同步获取数据
-  // static bool? getIsLogin;
-  // static String? getAuthToken;
+  static Map? loginInfo;
+  static String? accessToken;
   //初始化全局信息，会在APP启动时执行
   static Future init() async {
     WidgetsFlutterBinding.ensureInitialized();
     prefs = await SharedPreferences.getInstance();
-    // getIsLogin = await SPrefsUtil().isLogin.getValue();
-    // getAuthToken = await SPrefsUtil().authToken.getValue();
+    final resInfo = await SPrefsUtil().loginInfo.getValue();
+    accessToken = await SPrefsUtil().accessToken.getValue();
+    loginInfo = !resInfo.isEmpty ? json.decode(resInfo) : null;
+    LOG.d('获取到的所有key=====${prefs.getKeys()}');
     return true;
   }
 }

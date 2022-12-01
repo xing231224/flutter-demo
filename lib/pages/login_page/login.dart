@@ -1,15 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_application_1/common/global.dart';
 import 'package:flutter_application_1/common/service.dart';
-import 'package:flutter_application_1/theme/app_colors.dart';
-import 'package:flutter_application_1/theme/app_theme.dart';
 import 'package:flutter_application_1/utils/c_log_util.dart';
 import 'package:flutter_application_1/utils/local.dart';
 import 'package:flutter_application_1/widgets/widget_login.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
-import 'package:flutter/scheduler.dart' show timeDilation;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,37 +19,45 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   var animationStatus = 0;
-  var _phone = new TextEditingController();
-  var _password = new TextEditingController();
+  var isPushName = false;
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormFieldState> _formPhoneKey = new GlobalKey<FormFieldState>();
   late AnimationController _loginButtonController;
-  String? _errorPhone;
-  String? _errorPass;
-
+  late AnimationController _loginPushController;
+  final Map<String, TextEditingController> fieldForm = {
+    'phone': new TextEditingController(),
+    'code': new TextEditingController(),
+  };
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _loginButtonController = new AnimationController(duration: Duration(milliseconds: 3000), vsync: this);
+    _loginButtonController = new AnimationController(duration: Duration(milliseconds: 2000), vsync: this);
+    _loginPushController = new AnimationController(duration: Duration(milliseconds: 2000), vsync: this);
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     _loginButtonController.dispose();
+    _loginPushController.dispose();
     super.dispose();
   }
 
   Future<Null> _playAnimation() async {
     try {
       await _loginButtonController.forward();
-      await _loginButtonController.reverse();
     } on TickerCanceled {}
   }
 
   Future<bool> _authCodeTap() async {
     try {
       LOG.d('------------开始发送验证码');
-      return true;
+      final phone = _formPhoneKey.currentState?.validate();
+      if (phone != null && phone) {
+        return true;
+      }
+      return false;
     } on TickerCanceled {
       return false;
     }
@@ -72,11 +79,23 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             Stack(
               alignment: AlignmentDirectional.bottomCenter,
               children: [
+                Positioned(
+                  bottom: 0,
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Opacity(
+                      opacity: .2,
+                    ),
+                  ),
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(height: 250),
                     FormContainer(
+                      fieldProp: fieldForm,
+                      formKey: _formKey,
+                      formPhoneKey: _formPhoneKey,
                       authCodeTap: _authCodeTap,
                     ),
                     SignUp(),
@@ -87,17 +106,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     ? new Padding(
                         padding: EdgeInsets.only(bottom: 280.0),
                         child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              animationStatus = 1;
-                            });
-                            _playAnimation();
-                          },
+                          onTap: loginSubmit,
                           child: AnimationBtn(),
                         ),
                       )
                     : new StaggerAnimation(
                         buttonController: _loginButtonController,
+                        isPushName: isPushName,
+                        pushController: _loginPushController,
                         bottom: 280.0,
                       ),
               ],
@@ -108,24 +124,31 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
   }
 
-  void loginBtn() async {
-    setState(() {
-      if (_phone.text == '') {
-        _errorPhone = '手机号不得为空';
-        return;
-      } else {
-        _errorPhone = null;
+  // 登录
+  void loginSubmit() async {
+    final form = _formKey.currentState?.validate();
+    if (form != null && form) {
+      setState(() {
+        animationStatus = 1;
+      });
+      _playAnimation();
+      final phone = fieldForm['phone']?.text;
+      final code = fieldForm['code']?.text;
+      Response data = await LoginApi.loginAuth({"phone": phone, "code": code});
+      if (!data.data.toString().isEmpty) {
+        LOG.d('返回的数据 ===== ${data.data['access_token']}');
+        // 存本地 全局;
+        Global.accessToken = data.data['access_token'];
+        final a = await SPrefsUtil().accessToken.setValue(data.data['access_token']);
+        final b = await SPrefsUtil().loginInfo.setValue(json.encode(data.data));
+        print('是否存本地============== ${a}');
+        if (a && b) {
+          setState(() {
+            isPushName = true;
+          });
+          _loginPushController.forward();
+        }
       }
-      if (_password.text == '') {
-        _errorPass = '密码不得为空';
-        return;
-      } else {
-        _errorPass = null;
-      }
-    });
-    if (_errorPhone != null || _errorPass != null) return;
-    LOG.d('${_phone.text}===================${_password.text}');
-    Response data = await LoginApi.loginAuth({"username": _phone.text, "password": _password.text});
-    LOG.d('${data}===================data');
+    }
   }
 }

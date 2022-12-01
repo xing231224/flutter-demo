@@ -30,6 +30,13 @@ class _BottomBarViewState extends State<BottomBarView> with TickerProviderStateM
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    animationController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: AlignmentDirectional.bottomCenter,
@@ -213,6 +220,12 @@ class _TabIconsState extends State<TabIcons> with TickerProviderStateMixin {
 
   void setAnimation() {
     widget.tabIconData?.animationController?.forward();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override

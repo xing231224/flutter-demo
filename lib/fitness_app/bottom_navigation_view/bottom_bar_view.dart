@@ -21,10 +21,17 @@ class _BottomBarViewState extends State<BottomBarView> with TickerProviderStateM
   void initState() {
     animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 2000),
     );
     animationController?.forward();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    animationController?.dispose();
+    super.dispose();
   }
 
   @override

@@ -155,5 +155,7 @@ class SPrefsUtil {
   // 申明一个默认值为false的是否登录isLogin
   var isLogin = false.spValue('isLogin');
   // 申明一个默认值为空字符串的authToken
-  var authToken = ''.spValue('Auth-Token', hasCache: true);
+  var accessToken = ''.spValue('accessToken', hasCache: true);
+  // 存储登录信息
+  var loginInfo = ''.spValue("loginInfo", hasCache: true);
 }
