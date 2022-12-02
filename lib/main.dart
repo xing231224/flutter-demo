@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/common/global.dart';
 import 'package:flutter_application_1/routes/routes.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 void main() {
   if (Platform.isAndroid) {
@@ -41,3 +43,28 @@ class HexColor extends Color {
     return int.parse(hexColor, radix: 16);
   }
 }
+
+// class MyHomePage extends StatefulWidget {
+//   MyHomePage({Key? key, required this.title}) : super(key: key);
+
+//   final String title;
+
+//   @override
+//   _MyHomePageState createState() => _MyHomePageState();
+// }
+
+// class _MyHomePageState extends State<MyHomePage> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Material(
+//       child: SizedBox.expand(
+//         child: SingleChildScrollView(
+//           primary: true,
+//           child: SafeArea(
+//             bottom: false,
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

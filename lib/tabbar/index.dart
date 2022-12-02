@@ -7,6 +7,7 @@ import 'package:flutter_application_1/tabbar/mine_page/index.dart';
 import 'package:flutter_application_1/tabbar/square_page/index.dart';
 import 'package:flutter_application_1/tabbar/task_page/index.dart';
 import 'package:fluwx/fluwx.dart' as fluwx;
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'bottom_navigation_view/bottom_bar_view.dart';
 import 'components/cancel_button.dart';
 import 'widgets/add_task.dart';
@@ -20,16 +21,11 @@ class TabbarDiy extends StatefulWidget {
 
 class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
   AnimationController? animationController;
-  AnimationController? animationBtnController;
-  Duration animationDuration = Duration(milliseconds: 270);
-
   List<TabIconData> tabIconsList = TabIconData.tabIconsList;
 
   Widget tabBody = Container(
     color: AppTheme.background,
   );
-  bool isHidden = true;
-  late Animation<double> containerSize;
   @override
   void initState() {
     super.initState();
@@ -41,7 +37,6 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
     tabIconsList[0].isSelected = true;
 
     animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
-    animationBtnController = AnimationController(vsync: this, duration: animationDuration);
     tabBody = TaskPage(animationController: animationController);
     super.initState();
   }
@@ -79,7 +74,6 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
 
   // 初始化微信配置
   _initFluwx() async {
-    print(1111111);
     print("这里进来了吗？");
     bool result = await fluwx.registerWxApi(
         appId: 'wxf15c8d316e65375e',
@@ -95,19 +89,12 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
   @override
   void dispose() {
     animationController?.dispose();
-    animationBtnController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    // double defaultSize = size.height - (size.height * 0.2);
-    double defaultSize = size.height - (size.height * 0.1);
-    containerSize = Tween<double>(begin: size.height * 0.1, end: defaultSize)
-        .animate(CurvedAnimation(parent: animationBtnController!, curve: Curves.linear));
-    return Container(
-      color: AppTheme.background,
+    return Material(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: FutureBuilder<bool>(
@@ -122,34 +109,7 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
                     padding: EdgeInsets.fromLTRB(0, 0, 0, 38),
                     child: tabBody,
                   ),
-                  bottomBar(),
-                  CancelButton(
-                    isHidden: isHidden,
-                    animationDuration: animationDuration,
-                    size: size,
-                    animationController: animationBtnController,
-                    tapEvent: isHidden
-                        ? null
-                        : () {
-                            // returning null to disable the button
-                            animationBtnController!.reverse();
-                            setState(() {
-                              isHidden = !isHidden;
-                            });
-                          },
-                  ),
-                  AnimatedBuilder(
-                    animation: animationBtnController!,
-                    builder: (context, child) {
-                      if (!isHidden) {
-                        return buildRegisterContainer();
-                      }
-                      // Returning empty container to hide the widget
-                      return Container();
-                    },
-                  ),
-                  AddTaskWidget(
-                      isHidden: isHidden, animationDuration: animationDuration, size: size, defaultSize: defaultSize)
+                  bottomBar(context),
                 ],
               );
             }
@@ -157,6 +117,33 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
         ),
       ),
     );
+
+    // return Material(
+    //   child: Container(
+    //     color: AppTheme.background,
+    //     child: Scaffold(
+    //       backgroundColor: Colors.transparent,
+    //       body: FutureBuilder<bool>(
+    //         future: getData(),
+    //         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+    //           if (!snapshot.hasData) {
+    //             return const SizedBox();
+    //           } else {
+    //             return Stack(
+    //               children: <Widget>[
+    //                 Padding(
+    //                   padding: EdgeInsets.fromLTRB(0, 0, 0, 38),
+    //                   child: tabBody,
+    //                 ),
+    //                 bottomBar(context),
+    //               ],
+    //             );
+    //           }
+    //         },
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 
   Future<bool> getData() async {
@@ -164,7 +151,7 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
     return true;
   }
 
-  Widget bottomBar() {
+  Widget bottomBar(context) {
     return Column(
       children: <Widget>[
         const Expanded(
@@ -173,7 +160,12 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
         BottomBarView(
           isLabel: true,
           tabIconsList: tabIconsList,
-          addClick: handleAddTask,
+          addClick: () => showCupertinoModalBottomSheet(
+            expand: true,
+            context: context,
+            backgroundColor: Colors.white,
+            builder: (context) => AddTaskWidget(),
+          ),
           changeIndex: (int index) {
             animationController?.reverse().then<dynamic>((data) {
               if (!mounted) {
@@ -202,46 +194,5 @@ class _TabbarDiyState extends State<TabbarDiy> with TickerProviderStateMixin {
         ),
       ],
     );
-  }
-
-  Widget buildRegisterContainer() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        width: double.infinity,
-        height: containerSize.value,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(80),
-            topRight: Radius.circular(80),
-          ),
-          // boxShadow: [
-          //   BoxShadow(
-          //       color: Colors.black12,
-          //       offset: Offset(0.0, 1.0), //阴影xy轴偏移量
-          //       blurRadius: 1.0, //阴影模糊程度
-          //       spreadRadius: 1.0 //阴影扩散程度
-          //       )
-          // ],
-          color: Colors.white30,
-        ),
-        clipBehavior: Clip.hardEdge,
-        alignment: Alignment.center,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-          child: Opacity(
-            opacity: 0.1,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 创建任务
-  handleAddTask() {
-    setState(() {
-      isHidden = false;
-    });
-    animationBtnController!.forward();
   }
 }

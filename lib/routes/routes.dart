@@ -4,7 +4,7 @@ import 'package:flutter_application_1/fitness_app/fitness_app_home_screen.dart';
 import 'package:flutter_application_1/pages/login_page/login.dart';
 import 'package:flutter_application_1/tabbar/index.dart';
 import 'package:flutter_application_1/utils/c_log_util.dart';
-import 'package:flutter_application_1/utils/local.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 final Map<String, Function> routes = {
   "/": (context) => const TabbarDiy(),
@@ -26,11 +26,13 @@ var onGenerateRoute = (RouteSettings settings) {
       return route;
     }
     if (settings.arguments != null) {
+      LOG.d('111');
       final Route route =
-          CupertinoPageRoute(builder: (context) => pageContentBuilder(context, arguments: settings.arguments));
+          MaterialWithModalsPageRoute(builder: (context) => pageContentBuilder(context, arguments: settings.arguments));
       return route;
     } else {
-      final Route route = CupertinoPageRoute(builder: (context) => pageContentBuilder(context));
+      LOG.d('222');
+      final Route route = MaterialWithModalsPageRoute(builder: (context) => pageContentBuilder(context));
       return route;
     }
   }
